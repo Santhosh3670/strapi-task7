@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  strapi:
+    build: .
+    container_name: strapi-app
+    ports:
+      - "1337:1337"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      HOST: 0.0.0.0
+      PORT: 1337
+      APP_KEYS: StrapiSecretKey123,StrapiSessionKey456
+      API_TOKEN_SALT: X1qWQ6NhFZuIhWzLiaY+yg==
+      ADMIN_JWT_SECRET: L7HDUEBEAL5J8G3Flfz+ow==
+      TRANSFER_TOKEN_SALT: 9N5STMHDIBXnVRtnURkkqQ==
+      ENCRYPTION_KEY: dpgBNODZDz9Pz1mocHcMLg==
+      JWT_SECRET: 7k+29+0L2LYIUJjYMkAPhw==
+
