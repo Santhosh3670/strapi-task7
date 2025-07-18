@@ -1,13 +1,18 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 FROM node:20
 =======
 # Use latest Node 20 Alpine image
 FROM node:20-alpine
 >>>>>>> 1ab85181 (Initial commit: Strapi project with Docker setup)
+=======
+>>>>>>> bcf28e48 ( created ngnix service and all 3 containers running in port 80)
 
-# Set working directory
+FROM node:20
+
 WORKDIR /app
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 # Copy dependency files
 COPY package*.json ./
@@ -30,19 +35,19 @@ EXPOSE 1337
 CMD ["npm", "start"]
 =======
 # Copy only package files and install dependencies first (caching)
+=======
+
+>>>>>>> bcf28e48 ( created ngnix service and all 3 containers running in port 80)
 COPY package*.json ./
 RUN npm install
 
-# Copy the rest of the app
+
 COPY . .
 
-# Expose Strapi default port
+
 EXPOSE 1337
 
-# Set environment variables from .env file (optional but recommended)
-# NOTE: .env should be in project root and will be read by Strapi
 
-# Run Strapi in development mode
 CMD ["npm", "run", "develop"]
 >>>>>>> 1ab85181 (Initial commit: Strapi project with Docker setup)
 
