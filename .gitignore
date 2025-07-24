@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Node.js / Strapi
 node_modules/
 strapi-app/node_modules/
@@ -35,4 +34,10 @@ dist/
 *.log
 strapi-app/node_modules/
 strapi-app/.env
->>>>>>> 1ab85181 (Initial commit: Strapi project with Docker setup)
+
+
+terraform6/.terraform/
+terraform6/terraform.tfstate
+terraform6/terraform.tfstate.backup
+terraform6/.terraform.lock.hcl
+
