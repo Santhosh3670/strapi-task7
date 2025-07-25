@@ -1,8 +1,3 @@
-# ✅ Contribution Rules
-
-1. **Work in Your Own Branch**  
-   - Create a branch named after your own name.  
-   - Push all changes and tasks to your personal branch only.
 
 2. **Daily Pull Request (PR)**  
    - At the end of each day, create a Pull Request (PR) from your branch, even if your task is not yet complete.  
