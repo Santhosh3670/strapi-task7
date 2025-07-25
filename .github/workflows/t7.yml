@@ -52,7 +52,7 @@ jobs:
 
       - name: Terraform Plan
         working-directory: terraform7
-        run: terraform plan -out=tfplan \
+        run: terraform plan -out=tfplan 
              -var="image_uri=${{ env.IMAGE_URI }}"
 
       - name: Terraform Apply
