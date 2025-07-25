@@ -1,4 +1,4 @@
-name: Deploy Strapi to ECS
+name: Task 7 - Build and Deploy Strapi App
 
 on:
   push:
@@ -6,19 +6,21 @@ on:
       - santhosh
 
 env:
-  AWS_REGION: ap-south-1
-  ECR_REPO: ${{ secrets.ECR_REPOSITORY }}
-  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER_NAME }}
-  ECS_SERVICE: ${{ secrets.ECS_SERVICE_NAME }}
-  ECS_TASK_FAMILY: ${{ secrets.ECS_TASK_DEF_FAMILY }}
+  AWS_REGION: us-east-2
+  ECR_REPOSITORY: strapi-sk
+  IMAGE_TAG: ${{ github.sha }}
+  TF_VAR_aws_region: us-east-2
+  TF_VAR_execution_role_arn: arn:aws:iam::607700977843:role/ecs-task-execution-role
+  TF_VAR_task_role_arn: arn:aws:iam::607700977843:role/ecs-task-execution-role
 
 jobs:
   deploy:
+    name: Build, Push to ECR & Deploy to ECS via Terraform
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -28,26 +30,32 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v1
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build and tag Docker image
+      - name: Build, Tag and Push Docker Image to ECR
         run: |
-          IMAGE_TAG=$(date +%s)
-          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-          docker build -t $ECR_REPO:$IMAGE_TAG .
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          IMAGE_URI=$ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}
+          docker build -t $IMAGE_URI ./strapi-app
+          docker push $IMAGE_URI
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
-      - name: Push Docker image to ECR
-        run: |
-          docker push $ECR_REPO:$IMAGE_TAG
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
 
-      - name: Update ECS task definition with new image
-        run: |
-          aws ecs describe-task-definition --task-definition $ECS_TASK_FAMILY > taskdef.json
-          cat taskdef.json | jq --arg IMAGE "$ECR_REPO:$IMAGE_TAG" '.taskDefinition | .containerDefinitions[0].image = $IMAGE | {family: .family, containerDefinitions: [.containerDefinitions[0]], requiresCompatibilities: .requiresCompatibilities, cpu: .cpu, memory: .memory, networkMode: .networkMode, executionRoleArn: .executionRoleArn, taskRoleArn: .taskRoleArn}' > new-taskdef.json
-          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition --cli-input-json file://new-taskdef.json | jq -r '.taskDefinition.taskDefinitionArn')
-          echo "NEW_TASK_DEF_ARN=$NEW_TASK_DEF_ARN" >> $GITHUB_ENV
+      - name: Terraform Init
+        working-directory: terraform7
+        run: terraform init
 
-      - name: Update ECS service
-        run: |
-          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --task-definition $NEW_TASK_DEF_ARN
+      - name: Terraform Plan
+        working-directory: terraform7
+        run: terraform plan -out=tfplan \
+             -var="image_uri=${{ env.IMAGE_URI }}"
+
+      - name: Terraform Apply
+        working-directory: terraform7
+        run: terraform apply -auto-approve tfplan
 
