@@ -46,7 +46,7 @@ resource "aws_lb" "strapi_alb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.strapi_sg.id]
-  subnets            = data.aws_subnets.default_subnets.ids
+  subnets            = slice(data.aws_subnets.default_subnets.ids, 0, 2) # Ensure subnets are in different AZs
 
   tags = {
     Name = "strapi-alb-sk"
@@ -95,19 +95,15 @@ resource "aws_ecs_task_definition" "strapi_task" {
   execution_role_arn       = var.execution_role_arn
   task_role_arn            = var.task_role_arn
 
-  container_definitions = jsonencode([
-    {
-      name      = "strapi"
-      image     = var.image_uri
-      essential = true
-      portMappings = [
-        {
-          containerPort = 1337
-          hostPort      = 1337
-        }
-      ]
-    }
-  ])
+  container_definitions = jsonencode([{
+    name      = "strapi"
+    image     = var.image_uri
+    essential = true
+    portMappings = [{
+      containerPort = 1337
+      hostPort      = 1337
+    }]
+  }])
 }
 
 resource "aws_ecs_service" "strapi_service" {
@@ -124,7 +120,7 @@ resource "aws_ecs_service" "strapi_service" {
   }
 
   network_configuration {
-    subnets = slice(data.aws_subnets.default_subnets.ids, 0, 2)
+    subnets         = slice(data.aws_subnets.default_subnets.ids, 0, 2)
     security_groups = [aws_security_group.strapi_sg.id]
     assign_public_ip = false
   }
