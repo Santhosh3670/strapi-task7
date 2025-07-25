@@ -60,6 +60,6 @@ jobs:
           terraform apply -auto-approve \
             -var="aws_region=${AWS_REGION}" \
             -var="image_uri=${{ env.IMAGE_URI }}" \
-            -var="execution_role_name=ecs-task-execution-role" \
-            -var="task_role_name=ecs-task-execution-role"
+            -var="execution_role_arn=arn:aws:iam::607700977843:role/ecs-task-execution-role" \
+            -var="task_role_arn=arn:aws:iam::607700977843:role/ecs-task-execution-role"
 
