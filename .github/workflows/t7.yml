@@ -54,8 +54,8 @@ jobs:
         working-directory: terraform7
         run: terraform init
           
-          - name: Terraform Import ECS Service
-  run: terraform import aws_ecs_service.strapi_service strapi-cluster-sk/strapi-service-sk
+      - name: Terraform Import ECS Service
+        run: terraform import aws_ecs_service.strapi_service strapi-cluster-sk/strapi-service-sk
 
       - name: Terraform Apply
         working-directory: terraform7
