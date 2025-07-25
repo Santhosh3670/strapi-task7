@@ -42,7 +42,7 @@ jobs:
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
           IMAGE_URI=607700977843.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:$IMAGE_TAG
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
-          docker build -t $IMAGE_URI .
+          docker build -t $IMAGE_URI ./strapi-app
           docker push $IMAGE_URI
 
       - name: Set up Terraform
