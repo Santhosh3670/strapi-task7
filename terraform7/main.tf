@@ -4,32 +4,39 @@ provider "aws" {
 
 data "aws_caller_identity" "current" {}
 
+data "aws_vpc" "default" {
+  default = true
+}
+
+data "aws_subnets" "default" {
+  filter {
+    name   = "default-for-az"
+    values = ["true"]
+  }
+}
+
 resource "aws_ecr_repository" "strapi_repo" {
-  name = var.ecr_repo_name
+  name = "strapi-sk"
+
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
 }
 
 resource "aws_ecs_cluster" "strapi_cluster" {
   name = "strapi-cluster-sk"
 }
 
-resource "aws_iam_role" "execution_role" {
-  name = "external-execution-role"  # Just a placeholder
-  arn  = var.execution_role_arn     # Already created outside
-}
-
-resource "aws_iam_role" "task_role" {
-  name = "external-task-role"
-  arn  = var.task_role_arn
-}
-
 resource "aws_ecs_task_definition" "strapi_task" {
   family                   = "strapi-task-sk"
   requires_compatibilities = ["FARGATE"]
-  network_mode            = "awsvpc"
-  cpu                     = "512"
-  memory                  = "1024"
-  execution_role_arn      = var.execution_role_arn
-  task_role_arn           = var.task_role_arn
+  network_mode             = "awsvpc"
+  cpu                      = "512"
+  memory                   = "1024"
+  execution_role_arn       = var.execution_role_arn
+  task_role_arn            = var.task_role_arn
 
   container_definitions = jsonencode([
     {
@@ -66,17 +73,6 @@ resource "aws_security_group" "strapi_sg" {
   }
 }
 
-data "aws_vpc" "default" {
-  default = true
-}
-
-data "aws_subnets" "default" {
-  filter {
-    name   = "default-for-az"
-    values = ["true"]
-  }
-}
-
 resource "aws_lb" "strapi_alb" {
   name               = "strapi-alb-sk"
   internal           = false
@@ -90,6 +86,7 @@ resource "aws_lb_target_group" "strapi_tg" {
   port     = 1337
   protocol = "HTTP"
   vpc_id   = data.aws_vpc.default.id
+  target_type = "ip"
 
   health_check {
     path                = "/"
