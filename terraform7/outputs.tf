@@ -1,5 +1,8 @@
-output "alb_url" {
-  value       = "http://${aws_lb.strapi_alb.dns_name}"
-  description = "Public ALB URL to access the Strapi app"
+output "ecs_service_name" {
+  value = aws_ecs_service.strapi_service.name
+}
+
+output "ecr_repo_url" {
+  value = aws_ecr_repository.strapi_repo.repository_url
 }
 
