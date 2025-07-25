@@ -1,61 +1,62 @@
-name: Task 7 - Build and Deploy Strapi App
+name: Deploy Strapi to ECS
 
 on:
   push:
     branches:
       - santhosh
 
-env:
-  AWS_REGION: us-east-2
-  ECR_REPOSITORY: strapi-sk
-  IMAGE_TAG: ${{ github.sha }}
-  TF_VAR_aws_region: us-east-2
-  TF_VAR_execution_role_arn: arn:aws:iam::607700977843:role/ecs-task-execution-role
-  TF_VAR_task_role_arn: arn:aws:iam::607700977843:role/ecs-task-execution-role
-
 jobs:
   deploy:
-    name: Build, Push to ECR & Deploy to ECS via Terraform
+    name: Deploy
     runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: us-east-2
+      ECR_REPO_NAME: strapi-sk
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: arn:aws:iam::607700977843:role/github-actions-role
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to Amazon ECR
-        id: login-ecr
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build, Tag and Push Docker Image to ECR
+      - name: Create ECR repo if not exists
         run: |
-          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-          IMAGE_URI=$ACCOUNT_ID.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}
-          docker build -t $IMAGE_URI ./strapi-app
-          docker push $IMAGE_URI
+          aws ecr describe-repositories --repository-names $ECR_REPO_NAME || \
+          aws ecr create-repository --repository-name $ECR_REPO_NAME
+
+      - name: Build and tag Docker image
+        run: |
+          IMAGE_TAG=$(git rev-parse --short HEAD)
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          IMAGE_URI=607700977843.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:$IMAGE_TAG
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+          docker build -t $IMAGE_URI .
+          docker push $IMAGE_URI
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.6
+          terraform_version: 1.7.5
 
       - name: Terraform Init
-        working-directory: terraform7
         run: terraform init
 
-      - name: Terraform Plan
-        working-directory: terraform7
-        run: terraform plan -out=tfplan 
-             -var="image_uri=${{ env.IMAGE_URI }}"
-
       - name: Terraform Apply
-        working-directory: terraform7
-        run: terraform apply -auto-approve tfplan
+        run: |
+          terraform apply -auto-approve \
+            -var="aws_region=${AWS_REGION}" \
+            -var="image_uri=${{ env.IMAGE_URI }}" \
+            -var="execution_role_name=ecs-task-execution-role" \
+            -var="task_role_name=ecs-task-execution-role"
 

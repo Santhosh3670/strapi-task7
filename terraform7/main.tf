@@ -15,6 +15,14 @@ data "aws_subnets" "default" {
   }
 }
 
+data "aws_iam_role" "execution_role" {
+  name = var.execution_role_name
+}
+
+data "aws_iam_role" "task_role" {
+  name = var.task_role_name
+}
+
 resource "aws_ecr_repository" "strapi_repo" {
   name = "strapi-sk"
 
@@ -27,30 +35,6 @@ resource "aws_ecr_repository" "strapi_repo" {
 
 resource "aws_ecs_cluster" "strapi_cluster" {
   name = "strapi-cluster-sk"
-}
-
-resource "aws_ecs_task_definition" "strapi_task" {
-  family                   = "strapi-task-sk"
-  requires_compatibilities = ["FARGATE"]
-  network_mode             = "awsvpc"
-  cpu                      = "512"
-  memory                   = "1024"
-  execution_role_arn       = var.execution_role_arn
-  task_role_arn            = var.task_role_arn
-
-  container_definitions = jsonencode([
-    {
-      name      = "strapi-container"
-      image     = var.image_uri
-      essential = true
-      portMappings = [
-        {
-          containerPort = 1337
-          protocol      = "tcp"
-        }
-      ]
-    }
-  ])
 }
 
 resource "aws_security_group" "strapi_sg" {
@@ -86,7 +70,8 @@ resource "aws_lb_target_group" "strapi_tg" {
   port     = 1337
   protocol = "HTTP"
   vpc_id   = data.aws_vpc.default.id
-  target_type = "ip"
+
+  target_type = "ip"  
 
   health_check {
     path                = "/"
@@ -107,6 +92,30 @@ resource "aws_lb_listener" "strapi_listener" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.strapi_tg.arn
   }
+}
+
+resource "aws_ecs_task_definition" "strapi_task" {
+  family                   = "strapi-task-sk"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = "512"
+  memory                   = "1024"
+  execution_role_arn       = data.aws_iam_role.execution_role.arn
+  task_role_arn            = data.aws_iam_role.task_role.arn
+
+  container_definitions = jsonencode([
+    {
+      name      = "strapi-container"
+      image     = var.image_uri
+      essential = true
+      portMappings = [
+        {
+          containerPort = 1337
+          protocol      = "tcp"
+        }
+      ]
+    }
+  ])
 }
 
 resource "aws_ecs_service" "strapi_service" {
