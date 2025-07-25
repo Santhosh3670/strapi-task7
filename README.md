@@ -1,5 +1,4 @@
-  
-   - At the end of each day, create a Pull Request (PR) from your branch, even if your task is not yet complete.  
+a Pull Request (PR) from your branch, even if your task is not yet complete.  
    - This helps in tracking daily progress and ensures visibility.
 
 3. **Do Not Push to `main`**  
