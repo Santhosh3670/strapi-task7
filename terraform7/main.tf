@@ -10,27 +10,21 @@ resource "aws_ecr_repository" "strapi_repo" {
   name = "strapi-sk"
 }
 
-resource "aws_vpc" "main_vpc" {
-  cidr_block = "10.0.0.0/16"
-  tags = {
-    Name = "strapi-vpc-sk"
-  }
+data "aws_vpc" "default" {
+  default = true
 }
 
-resource "aws_subnet" "public_subnet" {
-  vpc_id            = aws_vpc.main_vpc.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "${var.aws_region}a"
-
-  tags = {
-    Name = "strapi-subnet-sk"
+data "aws_subnets" "default_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
   }
 }
 
 resource "aws_security_group" "strapi_sg" {
   name        = "strapi-sg-sk"
   description = "Allow HTTP and HTTPS"
-  vpc_id      = aws_vpc.main_vpc.id
+  vpc_id      =  data.aws_vpc.default.id
 
   ingress {
     from_port   = 80
@@ -83,7 +77,7 @@ resource "aws_ecs_service" "strapi_service" {
   desired_count   = 1
 
   network_configuration {
-    subnets         = [aws_subnet.public_subnet.id]
+    subnets         = [data.aws_subnets.default_subnets.ids[0]]
     security_groups = [aws_security_group.strapi_sg.id]
     assign_public_ip = true
   }
