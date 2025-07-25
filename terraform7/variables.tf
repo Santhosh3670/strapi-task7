@@ -6,11 +6,12 @@ variable "image_uri" {
   description = "Full image URI with tag"
 }
 
-variable "execution_role_name" {
-  default = "ecs-task-execution-role"
+variable "execution_role_arn" {
+  description = "ECS task execution role ARN"
+  type        = string
 }
 
-variable "task_role_name" {
-  default = "ecs-task-execution-role"
+variable "task_role_arn" {
+  description = "ECS task role ARN"
+  type        = string
 }
-
