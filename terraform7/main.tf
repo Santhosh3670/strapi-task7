@@ -19,8 +19,8 @@ data "aws_subnets" "default_subnets" {
 
 resource "aws_security_group" "strapi_sg" {
   name        = "strapi-sg-sk"
-  description = "Allow HTTP and HTTPS"
-  vpc_id      =  data.aws_vpc.default.id
+  description = "Allow HTTP"
+  vpc_id      = data.aws_vpc.default.id
 
   ingress {
     from_port   = 80
@@ -38,6 +38,51 @@ resource "aws_security_group" "strapi_sg" {
 
   tags = {
     Name = "strapi-sg-sk"
+  }
+}
+
+resource "aws_lb" "strapi_alb" {
+  name               = "strapi-alb-sk"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.strapi_sg.id]
+  subnets            = data.aws_subnets.default_subnets.ids
+
+  tags = {
+    Name = "strapi-alb-sk"
+  }
+}
+
+resource "aws_lb_target_group" "strapi_tg" {
+  name        = "strapi-tg-sk"
+  port        = 1337
+  protocol    = "HTTP"
+  vpc_id      = data.aws_vpc.default.id
+  target_type = "ip"
+
+  health_check {
+    path                = "/"
+    protocol            = "HTTP"
+    matcher             = "200"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
+
+  tags = {
+    Name = "strapi-tg-sk"
+  }
+}
+
+resource "aws_lb_listener" "strapi_listener" {
+  load_balancer_arn = aws_lb.strapi_alb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.strapi_tg.arn
   }
 }
 
@@ -72,14 +117,21 @@ resource "aws_ecs_service" "strapi_service" {
   launch_type     = "FARGATE"
   desired_count   = 1
 
+  load_balancer {
+    target_group_arn = aws_lb_target_group.strapi_tg.arn
+    container_name   = "strapi"
+    container_port   = 1337
+  }
+
   network_configuration {
-    subnets         = [data.aws_subnets.default_subnets.ids[0]]
+    subnets         = data.aws_subnets.default_subnets.ids
     security_groups = [aws_security_group.strapi_sg.id]
-    assign_public_ip = true
+    assign_public_ip = false
   }
 
   depends_on = [
-    aws_ecs_task_definition.strapi_task
+    aws_ecs_task_definition.strapi_task,
+    aws_lb_listener.strapi_listener
   ]
 }
 

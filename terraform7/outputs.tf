@@ -1,4 +1,5 @@
-output "ecr_repo_url" {
-  value = aws_ecr_repository.strapi_repo.repository_url
+output "alb_dns_name" {
+  description = "Public ALB URL to access Strapi"
+  value       = aws_lb.strapi_alb.dns_name
 }
 
