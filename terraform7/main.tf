@@ -6,10 +6,6 @@ resource "aws_ecs_cluster" "strapi_cluster" {
   name = "strapi-cluster-sk"
 }
 
-resource "aws_ecr_repository" "strapi_repo" {
-  name = "strapi-sk"
-}
-
 data "aws_vpc" "default" {
   default = true
 }
