@@ -6,9 +6,9 @@ resource "aws_ecs_cluster" "strapi_cluster" {
   name = "strapi-cluster-sk"
 }
 
-#resource "aws_ecr_repository" "strapi_repo" {
-#  name = "strapi-sk"
-#}
+resource "aws_ecr_repository" "strapi_repo" {
+  name = "strapi-sk"
+}
 
 data "aws_vpc" "default" {
   default = true
@@ -21,29 +21,29 @@ data "aws_subnets" "default_subnets" {
   }
 }
 
-#resource "aws_security_group" "strapi_sg" {
- # name        = "strapi-sg-sk"
-  #description = "Allow HTTP and HTTPS"
-  #vpc_id      =  data.aws_vpc.default.id
+resource "aws_security_group" "strapi_sg" {
+  name        = "strapi-sg-sk"
+  description = "Allow HTTP and HTTPS"
+  vpc_id      =  data.aws_vpc.default.id
 
-  #ingress {
-   # from_port   = 80
-    #to_port     = 80
-    #protocol    = "tcp"
-    #cidr_blocks = ["0.0.0.0/0"]
-  #}
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-  #egress {
-  #  from_port   = 0
-   # to_port     = 0
-   # protocol    = "-1"
-    #cidr_blocks = ["0.0.0.0/0"]
- # }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
- # tags = {
-  #  Name = "strapi-sg-sk"
- # }
-#}
+  tags = {
+    Name = "strapi-sg-sk"
+  }
+}
 
 resource "aws_ecs_task_definition" "strapi_task" {
   family                   = "strapi-task-sk"
@@ -78,7 +78,7 @@ resource "aws_ecs_service" "strapi_service" {
 
   network_configuration {
     subnets         = [data.aws_subnets.default_subnets.ids[0]]
-    security_groups = ["sg-0fdb08ea95a1aa56b"]
+    security_groups = [aws_subnet.strapi_subnet.id]
     assign_public_ip = true
   }
 
