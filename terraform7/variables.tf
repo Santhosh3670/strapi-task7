@@ -4,6 +4,7 @@ variable "aws_region" {
 
 variable "image_uri" {
   description = "Full image URI with tag"
+  type        = string
 }
 
 variable "execution_role_arn" {
@@ -15,3 +16,4 @@ variable "task_role_arn" {
   description = "ECS task role ARN"
   type        = string
 }
+
