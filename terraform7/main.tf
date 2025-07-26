@@ -10,11 +10,30 @@ data "aws_vpc" "default" {
   default = true
 }
 
+# ✅ Get all subnets in default VPC
 data "aws_subnets" "default_subnets" {
   filter {
     name   = "vpc-id"
     values = [data.aws_vpc.default.id]
   }
+}
+
+# ✅ Ensure subnets are in unique AZs
+locals {
+  # Map AZ => subnet ID
+  az_to_subnet = tomap({
+    for subnet_id in data.aws_subnets.default_subnets.ids :
+    data.aws_subnet.subnet[subnet_id].availability_zone => subnet_id
+  })
+
+  # Pick 2 unique AZs only
+  selected_subnet_ids = slice(values(local.az_to_subnet), 0, 2)
+}
+
+# ✅ Need this to read AZs from subnet IDs
+data "aws_subnet" "subnet" {
+  for_each = toset(data.aws_subnets.default_subnets.ids)
+  id       = each.key
 }
 
 resource "aws_security_group" "strapi_sg" {
@@ -46,7 +65,7 @@ resource "aws_lb" "strapi_alb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.strapi_sg.id]
-  subnets            = distinct(data.aws_subnets.default_subnets.ids)
+  subnets            = local.selected_subnet_ids
 
   tags = {
     Name = "strapi-alb-sk"
@@ -122,7 +141,7 @@ resource "aws_ecs_service" "strapi_service" {
   }
 
   network_configuration {
-    subnets         = distinct(data.aws_subnets.default_subnets.ids)
+    subnets         = local.selected_subnet_ids
     security_groups = [aws_security_group.strapi_sg.id]
     assign_public_ip = true
   }
