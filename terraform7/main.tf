@@ -10,14 +10,11 @@ data "aws_vpc" "default" {
   default = true
 }
 
-# Updated: Get subnet IDs and fetch two distinct subnets
-data "aws_subnet_ids" "default" {
-  vpc_id = data.aws_vpc.default.id
-}
-
-data "aws_subnet" "selected" {
-  for_each = toset(slice(data.aws_subnet_ids.default.ids, 0, 2))
-  id       = each.value
+data "aws_subnets" "default_subnets" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
 }
 
 resource "aws_security_group" "strapi_sg" {
@@ -49,7 +46,7 @@ resource "aws_lb" "strapi_alb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.strapi_sg.id]
-  subnets            = [for s in data.aws_subnet.selected : s.id]  # ✅ Fixed
+  subnets            = distinct(data.aws_subnets.default_subnets.ids)
 
   tags = {
     Name = "strapi-alb-sk"
@@ -125,7 +122,7 @@ resource "aws_ecs_service" "strapi_service" {
   }
 
   network_configuration {
-    subnets         = [for s in data.aws_subnet.selected : s.id]  # ✅ Fixed
+    subnets         = distinct(data.aws_subnets.default_subnets.ids)
     security_groups = [aws_security_group.strapi_sg.id]
     assign_public_ip = true
   }
