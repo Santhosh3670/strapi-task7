@@ -61,7 +61,7 @@ resource "aws_lb_target_group" "strapi_tg" {
   target_type = "ip"
 
   health_check {
-    path                = "/_health"
+    path                = "/admin"
     protocol            = "HTTP"
     matcher             = "200"
     interval            = 30

@@ -1,23 +1,26 @@
 FROM node:20
 
+# Set working directory
 WORKDIR /app
 
-# Copy dependency files
+# Install OS dependencies
+RUN apt-get update && apt-get install -y netcat-openbsd
+
+# Copy only dependency declarations first for better Docker caching
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies (strapi and others)
+RUN npm install --legacy-peer-deps
 
-# Copy the full project, including .env
+# Copy the rest of the app
 COPY . .
 
-# Copy .env file explicitly (in case it's in .dockerignore)
-
-# Build Strapi for production
+# Build the Strapi app
 RUN npm run build
 
-# Expose Strapi's default port
+# Expose the Strapi port
 EXPOSE 1337
 
-# Start Strapi in production mode
+# Start the app
 CMD ["npm", "start"]
+

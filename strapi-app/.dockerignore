@@ -12,3 +12,4 @@ build
 .tmp
 .cache
 .strapi-updater.json
+
