@@ -2,44 +2,69 @@ provider "aws" {
   region = var.aws_region
 }
 
-resource "aws_ecs_cluster" "strapi_cluster" {
-  name = "strapi-cluster-sk"
-}
+resource "aws_vpc" "strapi_vpc" {
+  cidr_block = "10.0.0.0/16"
 
-data "aws_vpc" "default" {
-  default = true
-}
-
-# ✅ Get all subnets in default VPC
-data "aws_subnets" "default_subnets" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
+  tags = {
+    Name = "strapi-vpc-sk"
   }
 }
 
-# ✅ Ensure subnets are in unique AZs
-locals {
-  # Map AZ => subnet ID
-  az_to_subnet = tomap({
-    for subnet_id in data.aws_subnets.default_subnets.ids :
-    data.aws_subnet.subnet[subnet_id].availability_zone => subnet_id
-  })
+resource "aws_subnet" "subnet_a" {
+  vpc_id            = aws_vpc.strapi_vpc.id
+  cidr_block        = "10.0.1.0/24"
+  availability_zone = "us-east-2a"
 
-  # Pick 2 unique AZs only
-  selected_subnet_ids = slice(values(local.az_to_subnet), 0, 2)
+  tags = {
+    Name = "subnet-a"
+  }
 }
 
-# ✅ Need this to read AZs from subnet IDs
-data "aws_subnet" "subnet" {
-  for_each = toset(data.aws_subnets.default_subnets.ids)
-  id       = each.key
+resource "aws_subnet" "subnet_b" {
+  vpc_id            = aws_vpc.strapi_vpc.id
+  cidr_block        = "10.0.2.0/24"
+  availability_zone = "us-east-2b"
+
+  tags = {
+    Name = "subnet-b"
+  }
+}
+
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.strapi_vpc.id
+
+  tags = {
+    Name = "strapi-igw"
+  }
+}
+
+resource "aws_route_table" "public_rt" {
+  vpc_id = aws_vpc.strapi_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+
+  tags = {
+    Name = "strapi-public-rt"
+  }
+}
+
+resource "aws_route_table_association" "a" {
+  subnet_id      = aws_subnet.subnet_a.id
+  route_table_id = aws_route_table.public_rt.id
+}
+
+resource "aws_route_table_association" "b" {
+  subnet_id      = aws_subnet.subnet_b.id
+  route_table_id = aws_route_table.public_rt.id
 }
 
 resource "aws_security_group" "strapi_sg" {
   name        = "strapi-sg-sk"
   description = "Allow HTTP"
-  vpc_id      = data.aws_vpc.default.id
+  vpc_id      = aws_vpc.strapi_vpc.id
 
   ingress {
     from_port   = 80
@@ -60,12 +85,16 @@ resource "aws_security_group" "strapi_sg" {
   }
 }
 
+resource "aws_ecs_cluster" "strapi_cluster" {
+  name = "strapi-cluster-sk"
+}
+
 resource "aws_lb" "strapi_alb" {
   name               = "strapi-alb-sk"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.strapi_sg.id]
-  subnets            = local.selected_subnet_ids
+  subnets            = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
 
   tags = {
     Name = "strapi-alb-sk"
@@ -76,7 +105,7 @@ resource "aws_lb_target_group" "strapi_tg" {
   name        = "strapi-tg-sk"
   port        = 1337
   protocol    = "HTTP"
-  vpc_id      = data.aws_vpc.default.id
+  vpc_id      = aws_vpc.strapi_vpc.id
   target_type = "ip"
 
   health_check {
@@ -141,7 +170,7 @@ resource "aws_ecs_service" "strapi_service" {
   }
 
   network_configuration {
-    subnets         = local.selected_subnet_ids
+    subnets         = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
     security_groups = [aws_security_group.strapi_sg.id]
     assign_public_ip = true
   }

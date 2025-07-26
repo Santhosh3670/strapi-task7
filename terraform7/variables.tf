@@ -3,17 +3,17 @@ variable "aws_region" {
 }
 
 variable "image_uri" {
-  description = "Full image URI with tag"
+  description = "The image URI for the Strapi container"
   type        = string
 }
 
 variable "execution_role_arn" {
-  description = "ECS task execution role ARN"
+  description = "IAM role ARN that ECS tasks use to pull images and publish logs"
   type        = string
 }
 
 variable "task_role_arn" {
-  description = "ECS task role ARN"
+  description = "IAM role ARN that the task assumes"
   type        = string
 }
 
