@@ -152,6 +152,16 @@ resource "aws_ecs_task_definition" "strapi_task" {
       hostPort      = 1337
       protocol      = "tcp"
     }]
+    environment = [
+      {
+        name  = "NODE_ENV"
+        value = "development"
+      },
+      {
+        name  = "JWT_SECRET"
+        value = "some-super-secret-value"
+      }
+    ]
     command = ["npm", "run", "start"]
   }])
 }
