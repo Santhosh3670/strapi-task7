@@ -1,0 +1,27 @@
+name: Manual Terraform Cleanup
+
+on:
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  destroy:
+    name: Destroy Terraform Infrastructure
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: |
+          cd terraform8
+          terraform init
+
+      - name: Terraform Destroy
+        run: |
+          cd terraform8
+          terraform destroy -auto-approve
+
