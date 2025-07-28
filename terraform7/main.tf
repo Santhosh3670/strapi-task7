@@ -73,6 +73,14 @@ resource "aws_security_group" "strapi_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+
+  ingress {
+    from_port   = 1337
+    to_port     = 1337
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -109,14 +117,14 @@ resource "aws_lb_target_group" "strapi_tg" {
   target_type = "ip"
 
   health_check {
-    path                = "/admin"
-    protocol            = "HTTP"
-    matcher             = "200"
-    interval            = 30
-    timeout             = 5
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-  }
+  path     = "/admin"
+  protocol = "HTTP"
+  matcher  = "200-499"
+  interval = 30
+  timeout  = 5
+  healthy_threshold   = 2
+  unhealthy_threshold = 2
+ }
 
   tags = {
     Name = "strapi-tg-sk"
@@ -149,7 +157,6 @@ resource "aws_ecs_task_definition" "strapi_task" {
     essential = true
     portMappings = [{
       containerPort = 1337
-      hostPort      = 1337
       protocol      = "tcp"
     }]
     environment = [
