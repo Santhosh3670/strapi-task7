@@ -168,6 +168,10 @@ resource "aws_ecs_task_definition" "strapi_task" {
      }
    }
     environment = [
+       {
+         name  = "APP_KEYS"
+         value = "myAppKeyA,myAppKeyB"
+      },
       {
         name  = "NODE_ENV"
         value = "development"
