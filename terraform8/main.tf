@@ -173,14 +173,31 @@ resource "aws_ecs_task_definition" "strapi_task" {
          value = "myAppKeyA,myAppKeyB"
       },
       {
-        name  = "NODE_ENV"
-        value = "development"
-      },
-      {
-        name  = "JWT_SECRET"
-        value = "some-super-secret-value"
-      }
-    ]
+    name  = "ADMIN_JWT_SECRET"
+    value = "GcGBhhDx1QgAbPFhZGgX1w=="
+  },
+  {
+    name  = "API_TOKEN_SALT"
+    value = "pJA+moB0PAlAFPigFYsFLw=="
+  },
+  {
+    name  = "TRANSFER_TOKEN_SALT"
+    value = "QEL8SHyO25m9I0shlYcWXA=="
+  },
+  {
+    name  = "ENCRYPTION_KEY"
+    value = "YaYBJstiUhloceTLBijBAQ=="
+  },
+  {
+    name  = "HOST"
+    value = "0.0.0.0"
+  },
+  {
+    name  = "PORT"
+    value = "1337"
+  }
+]
+    
     command = ["npm", "run", "start"]
   }])
 }
