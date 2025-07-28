@@ -1,27 +1,42 @@
-name: Manual Terraform Cleanup
+name: Cleanup Infrastructure
 
 on:
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
 
 jobs:
   destroy:
-    name: Destroy Terraform Infrastructure
+    name: Destroy Infrastructure
     runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: us-east-2
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Terraform
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
 
       - name: Terraform Init
-        run: |
-          cd terraform8
-          terraform init
+        working-directory: terraform8
+        run: terraform init
 
       - name: Terraform Destroy
+        working-directory: terraform8
         run: |
-          cd terraform8
-          terraform destroy -auto-approve
+          terraform destroy -auto-approve \
+            -var="aws_region=${AWS_REGION}" \
+            -var="image_uri=dummy" \
+            -var="execution_role_arn=arn:aws:iam::607700977843:role/ecs-task-execution-role" \
+            -var="task_role_arn=arn:aws:iam::607700977843:role/ecs-task-execution-role"
 
