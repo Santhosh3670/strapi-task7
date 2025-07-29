@@ -6,11 +6,14 @@ data "aws_vpc" "default" {
   default = true
 }
 
-data "aws_subnets" "default" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
-  }
+data "aws_subnet" "a" {
+  availability_zone = "us-east-2a"
+  default_for_az    = true
+}
+
+data "aws_subnet" "b" {
+  availability_zone = "us-east-2b"
+  default_for_az    = true
 }
 
 resource "aws_security_group" "strapi_sg" {
@@ -54,7 +57,7 @@ resource "aws_lb" "strapi_alb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.strapi_sg.id]
-  subnets            = data.aws_subnets.default.ids
+  subnets = [data.aws_subnet.a.id, data.aws_subnet.b.id]
 
   tags = {
     Name = "strapi-alb-sk"
@@ -172,7 +175,7 @@ resource "aws_ecs_service" "strapi_service" {
   }
 
   network_configuration {
-    subnets         = data.aws_subnets.default.ids
+    subnets = [data.aws_subnet.a.id, data.aws_subnet.b.id]
     security_groups = [aws_security_group.strapi_sg.id]
     assign_public_ip = true
   }
