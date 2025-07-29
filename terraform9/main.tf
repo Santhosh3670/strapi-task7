@@ -2,69 +2,21 @@ provider "aws" {
   region = var.aws_region
 }
 
-resource "aws_vpc" "strapi_vpc" {
-  cidr_block = "10.0.0.0/16"
-
-  tags = {
-    Name = "strapi-vpc-sk"
-  }
+data "aws_vpc" "default" {
+  default = true
 }
 
-resource "aws_subnet" "subnet_a" {
-  vpc_id            = aws_vpc.strapi_vpc.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "us-east-2a"
-
-  tags = {
-    Name = "subnet-a"
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
   }
-}
-
-resource "aws_subnet" "subnet_b" {
-  vpc_id            = aws_vpc.strapi_vpc.id
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = "us-east-2b"
-
-  tags = {
-    Name = "subnet-b"
-  }
-}
-
-resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.strapi_vpc.id
-
-  tags = {
-    Name = "strapi-igw"
-  }
-}
-
-resource "aws_route_table" "public_rt" {
-  vpc_id = aws_vpc.strapi_vpc.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
-
-  tags = {
-    Name = "strapi-public-rt"
-  }
-}
-
-resource "aws_route_table_association" "a" {
-  subnet_id      = aws_subnet.subnet_a.id
-  route_table_id = aws_route_table.public_rt.id
-}
-
-resource "aws_route_table_association" "b" {
-  subnet_id      = aws_subnet.subnet_b.id
-  route_table_id = aws_route_table.public_rt.id
 }
 
 resource "aws_security_group" "strapi_sg" {
   name        = "strapi-sg-sk"
   description = "Allow HTTP"
-  vpc_id      = aws_vpc.strapi_vpc.id
+  vpc_id = data.aws_vpc.default.id
 
   ingress {
     from_port   = 80
@@ -102,7 +54,7 @@ resource "aws_lb" "strapi_alb" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.strapi_sg.id]
-  subnets            = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+  subnets            = data.aws_subnets.default.ids
 
   tags = {
     Name = "strapi-alb-sk"
@@ -113,7 +65,7 @@ resource "aws_lb_target_group" "strapi_tg" {
   name        = "strapi-tg-sk"
   port        = 1337
   protocol    = "HTTP"
-  vpc_id      = aws_vpc.strapi_vpc.id
+  vpc_id = data.aws_vpc.default.id
   target_type = "ip"
 
   health_check {
@@ -220,7 +172,7 @@ resource "aws_ecs_service" "strapi_service" {
   }
 
   network_configuration {
-    subnets         = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+    subnets         = data.aws_subnets.default.ids
     security_groups = [aws_security_group.strapi_sg.id]
     assign_public_ip = true
   }
