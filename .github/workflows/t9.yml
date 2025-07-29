@@ -57,7 +57,7 @@ jobs:
       - name: Terraform Apply
         working-directory: terraform9
         run: |
-          terraform apply -auto-approve \
+          terraform destroy -auto-approve \
             -var="aws_region=${AWS_REGION}" \
             -var="image_uri=${{ env.IMAGE_URI }}" \
             -var="execution_role_arn=arn:aws:iam::607700977843:role/ecs-task-execution-role" \
