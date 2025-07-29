@@ -51,11 +51,11 @@ jobs:
           terraform_version: 1.7.5
 
       - name: Terraform Init
-        working-directory: terraform8
+        working-directory: terraform9
         run: terraform init
           
       - name: Terraform Apply
-        working-directory: terraform8
+        working-directory: terraform9
         run: |
           terraform apply -auto-approve \
             -var="aws_region=${AWS_REGION}" \
