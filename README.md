@@ -1,4 +1,4 @@
-rom your branch, even if your task is not yet complete.  
+r branch, even if your task is not yet complete.  
    - This helps in tracking daily progress and ensures visibility.
 
 3. **Do Not Push to `main`**  
