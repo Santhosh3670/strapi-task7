@@ -1,7 +1,4 @@
-r branch, even if your task is not yet complete.  
-   - This helps in tracking daily progress and ensures visibility.
-
-3. **Do Not Push to `main`**  
+3.**Do Not Push to `main`**  
    - Never push directly to the main branch.  
    - All changes should go through PRs and be reviewed before merging into main.
 
