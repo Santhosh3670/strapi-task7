@@ -1,4 +1,4 @@
-name: Deploy Strapi to ECS
+name: Deploy Strapi with Blue/Green ECS
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    name: Deploy
+    name: Blue/Green Deploy
     runs-on: ubuntu-latest
 
     env:
@@ -51,15 +51,16 @@ jobs:
           terraform_version: 1.7.5
 
       - name: Terraform Init
-        working-directory: terraform9
+        working-directory: terraform11
         run: terraform init
-          
+
       - name: Terraform Apply
-        working-directory: terraform9
+        working-directory: terraform11
         run: |
           terraform apply -auto-approve \
             -var="aws_region=${AWS_REGION}" \
             -var="image_uri=${{ env.IMAGE_URI }}" \
             -var="execution_role_arn=arn:aws:iam::607700977843:role/ecs-task-execution-role" \
-            -var="task_role_arn=arn:aws:iam::607700977843:role/ecs-task-execution-role"
+            -var="task_role_arn=arn:aws:iam::607700977843:role/ecs-task-execution-role" \
+            -var="codedeploy_role_arn=arn:aws:iam::607700977843:role/ecs-task-execution-role"
 
