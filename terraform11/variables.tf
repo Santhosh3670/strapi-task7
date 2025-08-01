@@ -17,3 +17,8 @@ variable "task_role_arn" {
   type        = string
 }
 
+variable "codedeploy_role_arn" {
+  description = "IAM Role ARN used by CodeDeploy"
+  type        = string
+}
+
