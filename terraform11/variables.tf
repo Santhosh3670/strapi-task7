@@ -17,8 +17,3 @@ variable "task_role_arn" {
   type        = string
 }
 
-variable "codedeploy_role_arn" {
-  description = "IAM role ARN for CodeDeploy to perform ECS actions"
-  type        = string
-}
-
