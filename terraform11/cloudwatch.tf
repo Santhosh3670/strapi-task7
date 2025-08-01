@@ -9,8 +9,7 @@ resource "aws_cloudwatch_metric_alarm" "ecs_cpu_high" {
   threshold           = 80
   alarm_description   = "Strapi ECS CPU usage too high"
 
-  alarm_actions = [aws_sns_topic.alarm_notifications.arn]
-
+  
   dimensions = {
     ClusterName = aws_ecs_cluster.strapi_cluster.name
     ServiceName = aws_ecs_service.strapi_service.name
@@ -28,9 +27,7 @@ resource "aws_cloudwatch_metric_alarm" "ecs_memory_high" {
   threshold           = 80
   alarm_description   = "Strapi ECS memory usage too high"
 
-  alarm_actions = [aws_sns_topic.alarm_notifications.arn]
-
-  dimensions = {
+   dimensions = {
     ClusterName = aws_ecs_cluster.strapi_cluster.name
     ServiceName = aws_ecs_service.strapi_service.name
   }
