@@ -54,7 +54,7 @@ jobs:
         working-directory: terraform11
         run: terraform init
 
-     - name: Terraform Apply
+      - name: Terraform Apply
         working-directory: terraform11
         run: |
           terraform apply -auto-approve \
