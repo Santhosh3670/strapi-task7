@@ -52,20 +52,26 @@ jobs:
       - name: Create New Task Definition Revision with Updated Image
         id: register-task
         run: |
-          sed -i "s|607700977843.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:.*|${IMAGE_URI}|" task-def.json
-          cat task-def.json | jq '{
-            family: .family,
-            executionRoleArn: .executionRoleArn,
-            taskRoleArn: .taskRoleArn,
-            networkMode: .networkMode,
-            containerDefinitions: .containerDefinitions,
-            requiresCompatibilities: .requiresCompatibilities,
-            cpu: .cpu,
-            memory: .memory
-          }' > new-task-def.json
+           IMAGE_URI=${{ env.IMAGE_URI }}
+    
+           jq --arg IMAGE "$IMAGE_URI" \
+             '.containerDefinitions[0].image = $IMAGE |
+              {
+               family,
+               executionRoleArn,
+               taskRoleArn,
+               networkMode,
+               containerDefinitions,
+               requiresCompatibilities,
+               cpu,
+               memory
+              }' task-def.json > new-task-def.json
+
+          cat new-task-def.json
 
           NEW_TASK_DEF_ARN=$(aws ecs register-task-definition --cli-input-json file://new-task-def.json --query 'taskDefinition.taskDefinitionArn' --output text)
           echo "NEW_TASK_DEF_ARN=$NEW_TASK_DEF_ARN" >> $GITHUB_ENV
+
 
       - name: Trigger CodeDeploy Deployment
         run: |
