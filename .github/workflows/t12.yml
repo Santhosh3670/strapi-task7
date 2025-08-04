@@ -15,7 +15,7 @@ jobs:
       ECR_REPO_NAME: strapi-sk
       ECS_CLUSTER: strapi-cluster-sk
       ECS_SERVICE: strapi-service-sk
-      TASK_DEF_FAMILY: strapi-taskdef-sk
+      TASK_DEF_FAMILY: strapi-tasik-sk
       CONTAINER_NAME: strapi-container
       CODEDEPLOY_APP_NAME: strapi-codedeploy-app-sk
       CODEDEPLOY_GROUP_NAME: strapi-deployment-group-sk
