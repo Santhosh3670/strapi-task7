@@ -15,7 +15,7 @@ jobs:
       ECR_REPO_NAME: strapi-sk
       ECS_CLUSTER: strapi-cluster-sk
       ECS_SERVICE: strapi-service-sk
-      TASK_DEF_FAMILY: strapi-task-sk
+      TASK_DEF_FAMILY: strapi-tasik-sk
       CONTAINER_NAME: strapi-container
       CODEDEPLOY_APP_NAME: strapi-codedeploy-app-sk
       CODEDEPLOY_GROUP_NAME: strapi-deployment-group-sk
@@ -52,11 +52,11 @@ jobs:
       - name: Create New Task Definition Revision with Updated Image
         id: register-task
         run: |
-           IMAGE_URI=${{ env.IMAGE_URI }}
-    
-           jq --arg IMAGE "$IMAGE_URI" \
-             '.containerDefinitions[0].image = $IMAGE |
-              {
+          IMAGE_URI=${{ env.IMAGE_URI }}
+
+          jq --arg IMAGE "$IMAGE_URI" \
+            '.containerDefinitions[0].image = $IMAGE |
+             {
                family,
                executionRoleArn,
                taskRoleArn,
@@ -65,13 +65,14 @@ jobs:
                requiresCompatibilities,
                cpu,
                memory
-              }' task-def.json > new-task-def.json
+             }' task-def.json > new-task-def.json
 
           cat new-task-def.json
 
-          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition --cli-input-json file://new-task-def.json --query 'taskDefinition.taskDefinitionArn' --output text)
+          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://new-task-def.json \
+            --query 'taskDefinition.taskDefinitionArn' --output text)
           echo "NEW_TASK_DEF_ARN=$NEW_TASK_DEF_ARN" >> $GITHUB_ENV
-
 
       - name: Trigger CodeDeploy Deployment
         run: |
