@@ -1,0 +1,731 @@
+{
+  "version": 4,
+  "terraform_version": "1.12.2",
+  "serial": 333,
+  "lineage": "2d220bb1-7f30-1455-d0ce-33bcffac8a89",
+  "outputs": {
+    "alb_dns_name": {
+      "value": "strapi-alb-sk-1171975307.us-east-2.elb.amazonaws.com",
+      "type": "string"
+    },
+    "log_group_name": {
+      "value": "/ecs/strapi-sk",
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "mode": "data",
+      "type": "aws_subnet",
+      "name": "a",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:us-east-2:607700977843:subnet/subnet-0c0bb5df2571165a9",
+            "assign_ipv6_address_on_creation": false,
+            "availability_zone": "us-east-2a",
+            "availability_zone_id": "use2-az1",
+            "available_ip_address_count": 4081,
+            "cidr_block": "172.31.0.0/20",
+            "customer_owned_ipv4_pool": "",
+            "default_for_az": true,
+            "enable_dns64": false,
+            "enable_lni_at_device_index": 0,
+            "enable_resource_name_dns_a_record_on_launch": false,
+            "enable_resource_name_dns_aaaa_record_on_launch": false,
+            "filter": null,
+            "id": "subnet-0c0bb5df2571165a9",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_association_id": "",
+            "ipv6_native": false,
+            "map_customer_owned_ip_on_launch": false,
+            "map_public_ip_on_launch": true,
+            "outpost_arn": "",
+            "owner_id": "607700977843",
+            "private_dns_hostname_type_on_launch": "ip-name",
+            "region": "us-east-2",
+            "state": "available",
+            "tags": {},
+            "timeouts": null,
+            "vpc_id": "vpc-06ba36bca6b59f95e"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0
+        }
+      ]
+    },
+    {
+      "mode": "data",
+      "type": "aws_subnet",
+      "name": "b",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:us-east-2:607700977843:subnet/subnet-0cc813dd4d76bf797",
+            "assign_ipv6_address_on_creation": false,
+            "availability_zone": "us-east-2b",
+            "availability_zone_id": "use2-az2",
+            "available_ip_address_count": 4079,
+            "cidr_block": "172.31.16.0/20",
+            "customer_owned_ipv4_pool": "",
+            "default_for_az": true,
+            "enable_dns64": false,
+            "enable_lni_at_device_index": 0,
+            "enable_resource_name_dns_a_record_on_launch": false,
+            "enable_resource_name_dns_aaaa_record_on_launch": false,
+            "filter": null,
+            "id": "subnet-0cc813dd4d76bf797",
+            "ipv6_cidr_block": "",
+            "ipv6_cidr_block_association_id": "",
+            "ipv6_native": false,
+            "map_customer_owned_ip_on_launch": false,
+            "map_public_ip_on_launch": true,
+            "outpost_arn": "",
+            "owner_id": "607700977843",
+            "private_dns_hostname_type_on_launch": "ip-name",
+            "region": "us-east-2",
+            "state": "available",
+            "tags": {},
+            "timeouts": null,
+            "vpc_id": "vpc-06ba36bca6b59f95e"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0
+        }
+      ]
+    },
+    {
+      "mode": "data",
+      "type": "aws_vpc",
+      "name": "default",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ec2:us-east-2:607700977843:vpc/vpc-06ba36bca6b59f95e",
+            "cidr_block": "172.31.0.0/16",
+            "cidr_block_associations": [
+              {
+                "association_id": "vpc-cidr-assoc-079ee5ea1da8fe27b",
+                "cidr_block": "172.31.0.0/16",
+                "state": "associated"
+              }
+            ],
+            "default": true,
+            "dhcp_options_id": "dopt-03e3d26b708060323",
+            "enable_dns_hostnames": true,
+            "enable_dns_support": true,
+            "enable_network_address_usage_metrics": false,
+            "filter": null,
+            "id": "vpc-06ba36bca6b59f95e",
+            "instance_tenancy": "default",
+            "ipv6_association_id": "",
+            "ipv6_cidr_block": "",
+            "main_route_table_id": "rtb-0542e3cdc6e78d5ee",
+            "owner_id": "607700977843",
+            "region": "us-east-2",
+            "state": null,
+            "tags": {},
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_cloudwatch_dashboard",
+      "name": "strapi_dashboard",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "dashboard_arn": "arn:aws:cloudwatch::607700977843:dashboard/strapi-dashboard-sk",
+            "dashboard_body": "{\"widgets\":[{\"height\":6,\"properties\":{\"metrics\":[[\"AWS/ECS\",\"CPUUtilization\",\"ClusterName\",\"strapi-cluster-sk\",\"ServiceName\",\"strapi-service-sk\"]],\"period\":60,\"region\":\"us-east-2\",\"stat\":\"Average\",\"title\":\"ECS CPU Utilization\"},\"type\":\"metric\",\"width\":12,\"x\":0,\"y\":0},{\"height\":6,\"properties\":{\"metrics\":[[\"AWS/ECS\",\"MemoryUtilization\",\"ClusterName\",\"strapi-cluster-sk\",\"ServiceName\",\"strapi-service-sk\"]],\"period\":60,\"region\":\"us-east-2\",\"stat\":\"Average\",\"title\":\"ECS Memory Utilization\"},\"type\":\"metric\",\"width\":12,\"x\":12,\"y\":0},{\"height\":6,\"properties\":{\"metrics\":[[\"AWS/ECS\",\"RunningTaskCount\",\"ClusterName\",\"strapi-cluster-sk\",\"ServiceName\",\"strapi-service-sk\"]],\"period\":60,\"region\":\"us-east-2\",\"stat\":\"Average\",\"title\":\"Running Task Count\"},\"type\":\"metric\",\"width\":12,\"x\":0,\"y\":6},{\"height\":6,\"properties\":{\"metrics\":[[\"ECS/ContainerInsights\",\"NetworkRxBytes\",\"ClusterName\",\"strapi-cluster-sk\",\"ServiceName\",\"strapi-service-sk\"]],\"period\":60,\"region\":\"us-east-2\",\"stat\":\"Sum\",\"title\":\"Network In (Bytes)\"},\"type\":\"metric\",\"width\":12,\"x\":12,\"y\":6},{\"height\":6,\"properties\":{\"metrics\":[[\"ECS/ContainerInsights\",\"NetworkTxBytes\",\"ClusterName\",\"strapi-cluster-sk\",\"ServiceName\",\"strapi-service-sk\"]],\"period\":60,\"region\":\"us-east-2\",\"stat\":\"Sum\",\"title\":\"Network Out (Bytes)\"},\"type\":\"metric\",\"width\":12,\"x\":0,\"y\":12}]}",
+            "dashboard_name": "strapi-dashboard-sk",
+            "id": "strapi-dashboard-sk",
+            "region": "us-east-2"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_cloudwatch_log_group",
+      "name": "strapi_log_group",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:logs:us-east-2:607700977843:log-group:/ecs/strapi-sk",
+            "id": "/ecs/strapi-sk",
+            "kms_key_id": "",
+            "log_group_class": "STANDARD",
+            "name": "/ecs/strapi-sk",
+            "name_prefix": "",
+            "region": "us-east-2",
+            "retention_in_days": 7,
+            "skip_destroy": false,
+            "tags": {
+              "Name": "strapi-log-group-sk"
+            },
+            "tags_all": {
+              "Name": "strapi-log-group-sk"
+            }
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjAifQ=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_codedeploy_app",
+      "name": "strapi",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "application_id": "40179656-54f6-4ac4-b1a0-f8cb6655a793",
+            "arn": "arn:aws:codedeploy:us-east-2:607700977843:application:strapi-codedeploy-sk",
+            "compute_platform": "ECS",
+            "github_account_name": "",
+            "id": "40179656-54f6-4ac4-b1a0-f8cb6655a793:strapi-codedeploy-sk",
+            "linked_to_github": false,
+            "name": "strapi-codedeploy-sk",
+            "region": "us-east-2",
+            "tags": {},
+            "tags_all": {}
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_ecs_cluster",
+      "name": "strapi_cluster",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:ecs:us-east-2:607700977843:cluster/strapi-cluster-sk",
+            "configuration": [],
+            "id": "arn:aws:ecs:us-east-2:607700977843:cluster/strapi-cluster-sk",
+            "name": "strapi-cluster-sk",
+            "region": "us-east-2",
+            "service_connect_defaults": [],
+            "setting": [
+              {
+                "name": "containerInsights",
+                "value": "disabled"
+              }
+            ],
+            "tags": {},
+            "tags_all": {}
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "bnVsbA=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_ecs_task_definition",
+      "name": "strapi_task",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ecs:us-east-2:607700977843:task-definition/strapi-task-sk:71",
+            "arn_without_revision": "arn:aws:ecs:us-east-2:607700977843:task-definition/strapi-task-sk",
+            "container_definitions": "[{\"command\":[\"npm\",\"run\",\"start\"],\"environment\":[{\"name\":\"ADMIN_JWT_SECRET\",\"value\":\"GcGBhhDx1QgAbPFhZGgX1w==\"},{\"name\":\"API_TOKEN_SALT\",\"value\":\"pJA+moB0PAlAFPigFYsFLw==\"},{\"name\":\"APP_KEYS\",\"value\":\"myAppKeyA,myAppKeyB\"},{\"name\":\"ENCRYPTION_KEY\",\"value\":\"YaYBJstiUhloceTLBijBAQ==\"},{\"name\":\"HOST\",\"value\":\"0.0.0.0\"},{\"name\":\"PORT\",\"value\":\"1337\"},{\"name\":\"TRANSFER_TOKEN_SALT\",\"value\":\"QEL8SHyO25m9I0shlYcWXA==\"}],\"essential\":true,\"image\":\"607700977843.dkr.ecr.us-east-2.amazonaws.com/strapi-sk:latest\",\"logConfiguration\":{\"logDriver\":\"awslogs\",\"options\":{\"awslogs-group\":\"/ecs/strapi-sk\",\"awslogs-region\":\"us-east-2\",\"awslogs-stream-prefix\":\"ecs\"}},\"mountPoints\":[],\"name\":\"strapi\",\"portMappings\":[{\"containerPort\":1337,\"hostPort\":1337,\"protocol\":\"tcp\"}],\"systemControls\":[],\"volumesFrom\":[]}]",
+            "cpu": "256",
+            "enable_fault_injection": false,
+            "ephemeral_storage": [],
+            "execution_role_arn": "arn:aws:iam::607700977843:role/ecs-task-execution-role",
+            "family": "strapi-task-sk",
+            "id": "strapi-task-sk",
+            "ipc_mode": "",
+            "memory": "512",
+            "network_mode": "awsvpc",
+            "pid_mode": "",
+            "placement_constraints": [],
+            "proxy_configuration": [],
+            "region": "us-east-2",
+            "requires_compatibilities": [
+              "FARGATE"
+            ],
+            "revision": 71,
+            "runtime_platform": [],
+            "skip_destroy": false,
+            "tags": {},
+            "tags_all": {},
+            "task_role_arn": "arn:aws:iam::607700977843:role/ecs-task-execution-role",
+            "track_latest": false,
+            "volume": []
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjEifQ=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_role",
+      "name": "codedeploy_role",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:iam::607700977843:role/ecs-codedeploy-role-sk",
+            "assume_role_policy": "{\"Statement\":[{\"Action\":\"sts:AssumeRole\",\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"codedeploy.amazonaws.com\"}}],\"Version\":\"2012-10-17\"}",
+            "create_date": "2025-08-01T02:35:28Z",
+            "description": "",
+            "force_detach_policies": false,
+            "id": "ecs-codedeploy-role-sk",
+            "inline_policy": [],
+            "managed_policy_arns": [
+              "arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS"
+            ],
+            "max_session_duration": 3600,
+            "name": "ecs-codedeploy-role-sk",
+            "name_prefix": "",
+            "path": "/",
+            "permissions_boundary": "",
+            "tags": {},
+            "tags_all": {},
+            "unique_id": "AROAY27ONBCZXEXFHUIHB"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "identity": {
+            "account_id": "607700977843",
+            "name": "ecs-codedeploy-role-sk"
+          },
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjAifQ=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_iam_role_policy_attachment",
+      "name": "codedeploy_role_attachment",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "ecs-codedeploy-role-sk/arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS",
+            "policy_arn": "arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS",
+            "role": "ecs-codedeploy-role-sk"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "identity": {
+            "account_id": "607700977843",
+            "policy_arn": "arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS",
+            "role": "ecs-codedeploy-role-sk"
+          },
+          "private": "bnVsbA==",
+          "dependencies": [
+            "aws_iam_role.codedeploy_role"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_lb",
+      "name": "strapi_alb",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "access_logs": [
+              {
+                "bucket": "",
+                "enabled": false,
+                "prefix": ""
+              }
+            ],
+            "arn": "arn:aws:elasticloadbalancing:us-east-2:607700977843:loadbalancer/app/strapi-alb-sk/99ea5cd50913b92f",
+            "arn_suffix": "app/strapi-alb-sk/99ea5cd50913b92f",
+            "client_keep_alive": 3600,
+            "connection_logs": [
+              {
+                "bucket": "",
+                "enabled": false,
+                "prefix": ""
+              }
+            ],
+            "customer_owned_ipv4_pool": "",
+            "desync_mitigation_mode": "defensive",
+            "dns_name": "strapi-alb-sk-1171975307.us-east-2.elb.amazonaws.com",
+            "dns_record_client_routing_policy": null,
+            "drop_invalid_header_fields": false,
+            "enable_cross_zone_load_balancing": true,
+            "enable_deletion_protection": false,
+            "enable_http2": true,
+            "enable_tls_version_and_cipher_suite_headers": false,
+            "enable_waf_fail_open": false,
+            "enable_xff_client_port": false,
+            "enable_zonal_shift": false,
+            "enforce_security_group_inbound_rules_on_private_link_traffic": "",
+            "id": "arn:aws:elasticloadbalancing:us-east-2:607700977843:loadbalancer/app/strapi-alb-sk/99ea5cd50913b92f",
+            "idle_timeout": 60,
+            "internal": false,
+            "ip_address_type": "ipv4",
+            "ipam_pools": [],
+            "load_balancer_type": "application",
+            "minimum_load_balancer_capacity": [],
+            "name": "strapi-alb-sk",
+            "name_prefix": "",
+            "preserve_host_header": false,
+            "region": "us-east-2",
+            "security_groups": [
+              "sg-07eb4b9446e21b763"
+            ],
+            "subnet_mapping": [
+              {
+                "allocation_id": "",
+                "ipv6_address": "",
+                "outpost_id": "",
+                "private_ipv4_address": "",
+                "subnet_id": "subnet-0c0bb5df2571165a9"
+              },
+              {
+                "allocation_id": "",
+                "ipv6_address": "",
+                "outpost_id": "",
+                "private_ipv4_address": "",
+                "subnet_id": "subnet-0cc813dd4d76bf797"
+              }
+            ],
+            "subnets": [
+              "subnet-0c0bb5df2571165a9",
+              "subnet-0cc813dd4d76bf797"
+            ],
+            "tags": {
+              "Name": "strapi-alb-sk"
+            },
+            "tags_all": {
+              "Name": "strapi-alb-sk"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-06ba36bca6b59f95e",
+            "xff_header_processing_mode": "append",
+            "zone_id": "Z3AADJGX6KTTL2"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "identity": {
+            "arn": "arn:aws:elasticloadbalancing:us-east-2:607700977843:loadbalancer/app/strapi-alb-sk/99ea5cd50913b92f"
+          },
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6NjAwMDAwMDAwMDAwLCJ1cGRhdGUiOjYwMDAwMDAwMDAwMH19",
+          "dependencies": [
+            "aws_security_group.strapi_sg",
+            "data.aws_subnet.a",
+            "data.aws_subnet.b",
+            "data.aws_vpc.default"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_lb_target_group",
+      "name": "strapi_blue_tg",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:elasticloadbalancing:us-east-2:607700977843:targetgroup/strapi-blue-tg-sk/579a62fc4ab7c610",
+            "arn_suffix": "targetgroup/strapi-blue-tg-sk/579a62fc4ab7c610",
+            "connection_termination": null,
+            "deregistration_delay": "300",
+            "health_check": [
+              {
+                "enabled": true,
+                "healthy_threshold": 2,
+                "interval": 30,
+                "matcher": "200-499",
+                "path": "/admin",
+                "port": "traffic-port",
+                "protocol": "HTTP",
+                "timeout": 5,
+                "unhealthy_threshold": 2
+              }
+            ],
+            "id": "arn:aws:elasticloadbalancing:us-east-2:607700977843:targetgroup/strapi-blue-tg-sk/579a62fc4ab7c610",
+            "ip_address_type": "ipv4",
+            "lambda_multi_value_headers_enabled": null,
+            "load_balancer_arns": [],
+            "load_balancing_algorithm_type": "round_robin",
+            "load_balancing_anomaly_mitigation": "off",
+            "load_balancing_cross_zone_enabled": "use_load_balancer_configuration",
+            "name": "strapi-blue-tg-sk",
+            "name_prefix": "",
+            "port": 1337,
+            "preserve_client_ip": null,
+            "protocol": "HTTP",
+            "protocol_version": "HTTP1",
+            "proxy_protocol_v2": null,
+            "region": "us-east-2",
+            "slow_start": 0,
+            "stickiness": [
+              {
+                "cookie_duration": 86400,
+                "cookie_name": "",
+                "enabled": false,
+                "type": "lb_cookie"
+              }
+            ],
+            "tags": {
+              "Name": "strapi-blue-tg-sk"
+            },
+            "tags_all": {
+              "Name": "strapi-blue-tg-sk"
+            },
+            "target_failover": [
+              {
+                "on_deregistration": null,
+                "on_unhealthy": null
+              }
+            ],
+            "target_group_health": [
+              {
+                "dns_failover": [
+                  {
+                    "minimum_healthy_targets_count": "1",
+                    "minimum_healthy_targets_percentage": "off"
+                  }
+                ],
+                "unhealthy_state_routing": [
+                  {
+                    "minimum_healthy_targets_count": 1,
+                    "minimum_healthy_targets_percentage": "off"
+                  }
+                ]
+              }
+            ],
+            "target_health_state": [
+              {
+                "enable_unhealthy_connection_termination": null,
+                "unhealthy_draining_interval": null
+              }
+            ],
+            "target_type": "ip",
+            "vpc_id": "vpc-06ba36bca6b59f95e"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "identity": {
+            "arn": "arn:aws:elasticloadbalancing:us-east-2:607700977843:targetgroup/strapi-blue-tg-sk/579a62fc4ab7c610"
+          },
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjAifQ=="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_lb_target_group",
+      "name": "strapi_green_tg",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "arn": "arn:aws:elasticloadbalancing:us-east-2:607700977843:targetgroup/strapi-green-tg-sk/6f8929e23b9b87eb",
+            "arn_suffix": "targetgroup/strapi-green-tg-sk/6f8929e23b9b87eb",
+            "connection_termination": null,
+            "deregistration_delay": "300",
+            "health_check": [
+              {
+                "enabled": true,
+                "healthy_threshold": 2,
+                "interval": 30,
+                "matcher": "200-499",
+                "path": "/admin",
+                "port": "traffic-port",
+                "protocol": "HTTP",
+                "timeout": 5,
+                "unhealthy_threshold": 2
+              }
+            ],
+            "id": "arn:aws:elasticloadbalancing:us-east-2:607700977843:targetgroup/strapi-green-tg-sk/6f8929e23b9b87eb",
+            "ip_address_type": "ipv4",
+            "lambda_multi_value_headers_enabled": null,
+            "load_balancer_arns": [],
+            "load_balancing_algorithm_type": "round_robin",
+            "load_balancing_anomaly_mitigation": "off",
+            "load_balancing_cross_zone_enabled": "use_load_balancer_configuration",
+            "name": "strapi-green-tg-sk",
+            "name_prefix": "",
+            "port": 1337,
+            "preserve_client_ip": null,
+            "protocol": "HTTP",
+            "protocol_version": "HTTP1",
+            "proxy_protocol_v2": null,
+            "region": "us-east-2",
+            "slow_start": 0,
+            "stickiness": [
+              {
+                "cookie_duration": 86400,
+                "cookie_name": "",
+                "enabled": false,
+                "type": "lb_cookie"
+              }
+            ],
+            "tags": {
+              "Name": "strapi-green-tg-sk"
+            },
+            "tags_all": {
+              "Name": "strapi-green-tg-sk"
+            },
+            "target_failover": [
+              {
+                "on_deregistration": null,
+                "on_unhealthy": null
+              }
+            ],
+            "target_group_health": [
+              {
+                "dns_failover": [
+                  {
+                    "minimum_healthy_targets_count": "1",
+                    "minimum_healthy_targets_percentage": "off"
+                  }
+                ],
+                "unhealthy_state_routing": [
+                  {
+                    "minimum_healthy_targets_count": 1,
+                    "minimum_healthy_targets_percentage": "off"
+                  }
+                ]
+              }
+            ],
+            "target_health_state": [
+              {
+                "enable_unhealthy_connection_termination": null,
+                "unhealthy_draining_interval": null
+              }
+            ],
+            "target_type": "ip",
+            "vpc_id": "vpc-06ba36bca6b59f95e"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "identity": {
+            "arn": "arn:aws:elasticloadbalancing:us-east-2:607700977843:targetgroup/strapi-green-tg-sk/6f8929e23b9b87eb"
+          },
+          "private": "eyJzY2hlbWFfdmVyc2lvbiI6IjAifQ==",
+          "dependencies": [
+            "data.aws_vpc.default"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "aws_security_group",
+      "name": "strapi_sg",
+      "provider": "provider[\"registry.terraform.io/hashicorp/aws\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "arn": "arn:aws:ec2:us-east-2:607700977843:security-group/sg-07eb4b9446e21b763",
+            "description": "Allow HTTP",
+            "egress": [
+              {
+                "cidr_blocks": [
+                  "0.0.0.0/0"
+                ],
+                "description": "",
+                "from_port": 0,
+                "ipv6_cidr_blocks": [],
+                "prefix_list_ids": [],
+                "protocol": "-1",
+                "security_groups": [],
+                "self": false,
+                "to_port": 0
+              }
+            ],
+            "id": "sg-07eb4b9446e21b763",
+            "ingress": [
+              {
+                "cidr_blocks": [
+                  "0.0.0.0/0"
+                ],
+                "description": "",
+                "from_port": 1337,
+                "ipv6_cidr_blocks": [],
+                "prefix_list_ids": [],
+                "protocol": "tcp",
+                "security_groups": [],
+                "self": false,
+                "to_port": 1337
+              },
+              {
+                "cidr_blocks": [
+                  "0.0.0.0/0"
+                ],
+                "description": "",
+                "from_port": 80,
+                "ipv6_cidr_blocks": [],
+                "prefix_list_ids": [],
+                "protocol": "tcp",
+                "security_groups": [],
+                "self": false,
+                "to_port": 80
+              }
+            ],
+            "name": "strapi-sg-sk",
+            "name_prefix": "",
+            "owner_id": "607700977843",
+            "region": "us-east-2",
+            "revoke_rules_on_delete": false,
+            "tags": {
+              "Name": "strapi-sg-sk"
+            },
+            "tags_all": {
+              "Name": "strapi-sg-sk"
+            },
+            "timeouts": null,
+            "vpc_id": "vpc-06ba36bca6b59f95e"
+          },
+          "sensitive_attributes": [],
+          "identity_schema_version": 0,
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6OTAwMDAwMDAwMDAwfSwic2NoZW1hX3ZlcnNpb24iOiIxIn0=",
+          "dependencies": [
+            "data.aws_vpc.default"
+          ]
+        }
+      ]
+    }
+  ],
+  "check_results": null
+}
