@@ -15,7 +15,7 @@ jobs:
       ECR_REPO_NAME: strapi-sk
       ECS_CLUSTER: strapi-cluster-sk
       ECS_SERVICE: strapi-service-sk
-      TASK_DEF_FAMILY: strapi-tasik-sk
+      TASK_DEF_FAMILY: strapi-task-sk
       CONTAINER_NAME: strapi-container
       CODEDEPLOY_APP_NAME: strapi-codedeploy-app-sk
       CODEDEPLOY_GROUP_NAME: strapi-deployment-group-sk
@@ -46,7 +46,7 @@ jobs:
       - name: Get Current Task Definition
         id: get-task
         run: |
-          aws ecs describe-task-definition --task-definition $TASK_DEF_FAMILY \
+          aws ecs describe-task-definition --task-definition "$TASK_DEF_FAMILY" \
             --query taskDefinition > task-def.json
 
       - name: Create New Task Definition Revision with Updated Image
@@ -74,10 +74,26 @@ jobs:
 
       - name: Trigger CodeDeploy Deployment
         run: |
+          IMAGE_URI=${{ env.IMAGE_URI }}
+          NEW_TASK_DEF_ARN=${{ env.NEW_TASK_DEF_ARN }}
+
+          APPSPEC_CONTENT=$(cat <<EOF
+version: 1
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: $NEW_TASK_DEF_ARN
+        LoadBalancerInfo:
+          ContainerName: $CONTAINER_NAME
+          ContainerPort: 1337
+EOF
+)
+
           aws deploy create-deployment \
-            --application-name $CODEDEPLOY_APP_NAME \
-            --deployment-group-name $CODEDEPLOY_GROUP_NAME \
-            --revision revisionType=AppSpecContent,appSpecContent="{\"content\":\"version: 1\nResources:\n  - TargetService:\n      Type: AWS::ECS::Service\n      Properties:\n        TaskDefinition: ${{ env.NEW_TASK_DEF_ARN }}\n        LoadBalancerInfo:\n          ContainerName: $CONTAINER_NAME\n          ContainerPort: 1337\n\"}" \
+            --application-name "$CODEDEPLOY_APP_NAME" \
+            --deployment-group-name "$CODEDEPLOY_GROUP_NAME" \
+            --revision "revisionType=AppSpecContent,appSpecContent={\"content\":\"$(echo "$APPSPEC_CONTENT" | sed ':a;N;$!ba;s/\n/\\n/g')\"}" \
             --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
             --description "Deploying image $IMAGE_URI"
 
