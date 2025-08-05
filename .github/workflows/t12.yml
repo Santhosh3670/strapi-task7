@@ -41,7 +41,7 @@ jobs:
         id: task-def
         run: |
           TASK_DEF=$(aws ecs describe-task-definition \
-            --task-definition strapi-taskdef-bluegreen-sk \
+            --task-definition strapi-task-sk \
             --query taskDefinition \
             --output json)
 
