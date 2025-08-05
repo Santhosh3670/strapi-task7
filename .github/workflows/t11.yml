@@ -7,7 +7,7 @@ on:
 
 env:
   AWS_REGION: us-east-2
-  ECR_REPOSITORY: strapi-repo-sk
+  ECR_REPOSITORY: strapi-sk
   ECS_CLUSTER: strapi-cluster-sk
   ECS_SERVICE: strapi-service-sk
   ECS_TASK_DEFINITION: taskdef.json
