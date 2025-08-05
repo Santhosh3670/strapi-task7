@@ -1,9 +1,8 @@
-name: Task 11 - Infra Provisioning
 
 on:
   push:
-   branches:
-     - santhosh
+    branches:
+      - santhosh
 
 env:
   AWS_REGION: us-east-2
@@ -48,8 +47,9 @@ jobs:
         working-directory: ${{ env.TERRAFORM_DIR }}
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve \
-          -var="codedeploy_role_arn=${{ secrets.CODEDEPLOY_ROLE_ARN }}" \
-          -var="image_uri=607700977843.dkr.ecr.us-east-2.amazonaws.com/strapi-sk:${{ github.sha }}"
+        run: |
+          terraform apply -auto-approve \
+            -var="codedeploy_role_arn=${{ secrets.CODEDEPLOY_ROLE_ARN }}" \
+            -var="image_uri=607700977843.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"
         working-directory: ${{ env.TERRAFORM_DIR }}
 
