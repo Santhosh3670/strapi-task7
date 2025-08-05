@@ -68,7 +68,7 @@ jobs:
     - name: Get current ECS Task Definition
       run: |
         aws ecs describe-task-definition \
-          --task-definition strapi-taskdef-sk \
+          --task-definition strapi-task-sk \
           --query taskDefinition \
           --output json > ecs-task-definition.json
 
