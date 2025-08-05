@@ -65,6 +65,12 @@ jobs:
           aws s3 cp appspec.yaml s3://$S3_BUCKET/appspec.yaml
           aws s3 cp imagedefinitions.json s3://$S3_BUCKET/imagedefinitions.json
 
+      - name: Upgrade AWS CLI to v2
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install --update
+
       - name: Trigger CodeDeploy deployment
         run: |
           aws deploy create-deployment \
@@ -73,5 +79,4 @@ jobs:
             --s3-location bucket=$S3_BUCKET,bundleType=YAML,key=appspec.yaml \
             --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
             --deployment-style deploymentType=BLUE_GREEN,deploymentOption=WITH_TRAFFIC_CONTROL
-
 
