@@ -1,7 +1,9 @@
 name: Task 11 - Infra Provisioning
 
 on:
-  workflow_dispatch:
+  push:
+   branches:
+     - santhosh
 
 env:
   AWS_REGION: us-east-2
