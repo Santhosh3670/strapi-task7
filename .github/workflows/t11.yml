@@ -1,81 +1,95 @@
-name: Task 11 - Deploy Strapi on ECS with Blue/Green
+name: Task 11 - Blue/Green ECS Deployment with Terraform
 
 on:
   push:
-    branches:
-      - santhosh  # Or your actual branch name
+    branches: [ main ]
 
 env:
   AWS_REGION: us-east-2
   ECR_REPOSITORY: strapi-sk
-  ECS_SERVICE: strapi-service-sk
   ECS_CLUSTER: strapi-cluster-sk
-  ECS_TASK_DEFINITION_FAMILY: strapi-td-sk
-  CODEDEPLOY_APP_NAME: strapi-codedeploy-app-sk
-  CODEDEPLOY_DEPLOYMENT_GROUP_NAME: strapi-deployment-group-sk
+  ECS_SERVICE: strapi-service-sk
+  CODEDEPLOY_APP: strapi-codedeploy-app-sk
+  CODEDEPLOY_GROUP: strapi-codedeploy-dg-sk
 
 jobs:
-  deploy:
-    name: Deploy to ECS
+  infra-and-deploy:
     runs-on: ubuntu-latest
-
     permissions:
       id-token: write
       contents: read
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::607700977843:role/GitHubActionsDeploymentRole
-          aws-region: ${{ env.AWS_REGION }}
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::607700977843:role/github-actions-role-strapi-sk
+        aws-region: ${{ env.AWS_REGION }}
 
-      - name: Log in to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+    ##############################
+    ## Terraform Infra Automation
+    ##############################
 
-      - name: Build, tag, and push image to ECR
-        run: |
-          IMAGE_TAG=${{ github.sha }}
-          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-          docker tag $ECR_REPOSITORY:$IMAGE_TAG 607700977843.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push 607700977843.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
 
-      - name: Download ECS task definition
-        run: |
-          aws ecs describe-task-definition \
-            --task-definition $ECS_TASK_DEFINITION_FAMILY \
-            --region $AWS_REGION \
-            --query taskDefinition \
-            > ecs-task-definition.json
+    - name: Terraform Init
+      run: terraform init
+      working-directory: ./terraform
 
-      - name: Update image in task definition
-        run: |
-          IMAGE_URI=607700977843.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:${{ github.sha }}
-          cat ecs-task-definition.json | jq --arg IMAGE "$IMAGE_URI" '.containerDefinitions[0].image=$IMAGE' > new-task-def.json
+    - name: Terraform Plan
+      run: terraform plan -out=tfplan
+      working-directory: ./terraform
 
-      - name: Register new task definition
-        id: register-task-def
-        run: |
-          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition \
-            --cli-input-json file://new-task-def.json \
-            --region $AWS_REGION \
-            --query 'taskDefinition.taskDefinitionArn' \
-            --output text)
-          echo "NEW_TASK_DEF_ARN=$NEW_TASK_DEF_ARN" >> $GITHUB_ENV
+    - name: Terraform Apply
+      run: terraform apply -auto-approve tfplan
+      working-directory: ./terraform
 
-      - name: Create CodeDeploy deployment
-        run: |
-          aws deploy create-deployment \
-            --application-name $CODEDEPLOY_APP_NAME \
-            --deployment-group-name $CODEDEPLOY_DEPLOYMENT_GROUP_NAME \
-            --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
-            --region $AWS_REGION \
-            --deployment-style deploymentType=BLUE_GREEN,deploymentOption=WITH_TRAFFIC_CONTROL \
-            --targetInstances "tagFilters=[]" \
-            --ecsServices serviceName=$ECS_SERVICE,clusterName=$ECS_CLUSTER \
-            --taskDefinition $NEW_TASK_DEF_ARN
+    ##############################
+    ## Docker + ECR + CodeDeploy
+    ##############################
+
+    - name: Log in to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build and push Docker image
+      run: |
+        IMAGE_TAG=${{ github.sha }}
+        docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+        docker tag $ECR_REPOSITORY:$IMAGE_TAG ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:$IMAGE_TAG
+      working-directory: ./strapi-app
+
+    - name: Get current ECS Task Definition
+      run: |
+        aws ecs describe-task-definition \
+          --task-definition strapi-taskdef-sk \
+          --query taskDefinition \
+          --output json > ecs-task-definition.json
+
+    - name: Update task definition with new image
+      run: |
+        IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ github.sha }}"
+        cat ecs-task-definition.json | jq --arg IMAGE "$IMAGE_URI" '.containerDefinitions[0].image = $IMAGE' > new-task-def.json
+
+    - name: Register updated task definition
+      id: register-task-def
+      run: |
+        TASK_DEF_ARN=$(aws ecs register-task-definition --cli-input-json file://new-task-def.json --query "taskDefinition.taskDefinitionArn" --output text)
+        echo "task_def_arn=$TASK_DEF_ARN" >> $GITHUB_ENV
+
+    - name: Trigger CodeDeploy Deployment
+      run: |
+        aws deploy create-deployment \
+          --application-name $CODEDEPLOY_APP \
+          --deployment-group-name $CODEDEPLOY_GROUP \
+          --deployment-config-name CodeDeployDefault.ECSCanary10Percent5Minutes \
+          --description "GitHub Actions deployment - $GITHUB_SHA" \
+          --github-location repository=${{ github.repository }},commitId=${{ github.sha }} \
+          --file-exists-behavior OVERWRITE \
+          --task-definition $task_def_arn
 
