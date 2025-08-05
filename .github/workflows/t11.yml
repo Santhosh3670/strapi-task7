@@ -39,15 +39,15 @@ jobs:
 
     - name: Terraform Init
       run: terraform init
-      working-directory: ./terraform
+      working-directory: ./terraform12
 
     - name: Terraform Plan
       run: terraform plan -out=tfplan
-      working-directory: ./terraform
+      working-directory: ./terraform12
 
     - name: Terraform Apply
       run: terraform apply -auto-approve tfplan
-      working-directory: ./terraform
+      working-directory: ./terraform12
 
     ##############################
     ## Docker + ECR + CodeDeploy
