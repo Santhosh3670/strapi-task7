@@ -1,22 +1,23 @@
-name: Deploy to ECS via CodeDeploy
+name: Task 12 - Blue/Green ECS Deployment
 
 on:
   push:
     branches:
       - santhosh
 
-env:
-  AWS_REGION: us-east-2
-  ECR_REPOSITORY: strapi-sk
-  ECS_CLUSTER: strapi-cluster-sk
-  ECS_SERVICE: strapi-service-sk
-  CODEDEPLOY_APPLICATION: strapi-codedeploy-sk
-  CODEDEPLOY_DEPLOYMENT_GROUP: strapi-dg-sk
-
 jobs:
   deploy:
-    name: Deploy Strapi to ECS Fargate via CodeDeploy
+    name: Deploy to ECS Fargate via CodeDeploy
     runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: us-east-2
+      ECR_REPO: strapi-sk
+      ECS_CLUSTER: strapi-cluster-sk
+      ECS_SERVICE: strapi-service-sk
+      CODEDEPLOY_APP: strapi-codedeploy-sk
+      DEPLOYMENT_GROUP: strapi-codedeploy-dg-sk
+      S3_BUCKET: sandy-starpi
 
     steps:
       - name: Checkout code
@@ -33,57 +34,43 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Extract image tag
-        id: image_tag
-        run: echo "IMAGE_TAG=${GITHUB_SHA}" >> $GITHUB_ENV
-
-      - name: Build and push Docker image
+      - name: Build, tag, and push image to ECR
         run: |
-          docker build -t ${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} ./strapi-app
-          docker tag ${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
-          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          IMAGE_TAG=${{ github.sha }}
+          docker build -t $ECR_REPO:$IMAGE_TAG ./strapi-app
+          docker tag $ECR_REPO:$IMAGE_TAG ${{ steps.login-ecr.outputs.registry }}/$ECR_REPO:$IMAGE_TAG
+          docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPO:$IMAGE_TAG
+          echo "IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/$ECR_REPO:$IMAGE_TAG" >> $GITHUB_ENV
 
-      - name: Register new ECS task definition
-        id: task-def
+      - name: Create imagedefinitions.json
         run: |
-          TASK_DEF_ARN=$(aws ecs describe-services \
-            --cluster $ECS_CLUSTER \
-            --services $ECS_SERVICE \
-            --query "services[0].taskDefinition" \
-            --output text)
+          echo '[{"name":"strapi-container","imageUri":"'"$IMAGE_URI"'"}]' > imagedefinitions.json
 
-          NEW_TASK_DEF=$(aws ecs describe-task-definition \
-            --task-definition $TASK_DEF_ARN)
+      - name: Create appspec.yaml
+        run: |
+          cat <<EOF > appspec.yaml
+          version: 1
+          Resources:
+            - TargetService:
+                Type: AWS::ECS::Service
+                Properties:
+                  TaskDefinition: ""
+                  LoadBalancerInfo:
+                    ContainerName: "strapi-container"
+                    ContainerPort: 1337
+          EOF
 
-          UPDATED_TASK_DEF=$(echo $NEW_TASK_DEF | \
-            jq --arg IMAGE_URI "${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}" \
-              '.taskDefinition | 
-              { 
-                family, 
-                executionRoleArn, 
-                taskRoleArn, 
-                networkMode, 
-                containerDefinitions: [.containerDefinitions[0] + {image: $IMAGE_URI}], 
-                requiresCompatibilities, 
-                cpu, 
-                memory 
-              }')
+      - name: Upload deployment files to S3
+        run: |
+          aws s3 cp appspec.yaml s3://$S3_BUCKET/appspec.yaml
+          aws s3 cp imagedefinitions.json s3://$S3_BUCKET/imagedefinitions.json
 
-          echo "$UPDATED_TASK_DEF" > taskdef.json
-
-          REGISTERED_TASK_DEF_ARN=$(aws ecs register-task-definition \
-            --cli-input-json file://taskdef.json \
-            --query "taskDefinition.taskDefinitionArn" \
-            --output text)
-
-          echo "TASK_DEF_ARN=$REGISTERED_TASK_DEF_ARN" >> $GITHUB_ENV
-
-      - name: Trigger deployment using CodeDeploy
+      - name: Trigger CodeDeploy deployment
         run: |
           aws deploy create-deployment \
-            --application-name $CODEDEPLOY_APPLICATION \
-            --deployment-group-name $CODEDEPLOY_DEPLOYMENT_GROUP \
+            --application-name $CODEDEPLOY_APP \
+            --deployment-group-name $DEPLOYMENT_GROUP \
             --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
-            --description "GitHub Actions deployment - $GITHUB_SHA" \
-            --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
+            --s3-location bucket=$S3_BUCKET,bundleType=YAML,key=appspec.yaml \
+            --file-exists-behavior OVERWRITE
 
