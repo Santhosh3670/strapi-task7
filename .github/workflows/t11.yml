@@ -48,6 +48,8 @@ jobs:
         working-directory: ${{ env.TERRAFORM_DIR }}
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -var="codedeploy_role_arn=${{ secrets.CODEDEPLOY_ROLE_ARN }}"
-        working-directory: ${{ env.TERRAFORM_DIR }}
+        run: terraform apply -auto-approve \
+          -var="codedeploy_role_arn=${{ secrets.CODEDEPLOY_ROLE_ARN }}" \
+          -var="image_uri=607700977843.dkr.ecr.us-east-2.amazonaws.com/strapi-sk:${{ github.sha }}"
+          working-directory: ${{ env.TERRAFORM_DIR }}
 
