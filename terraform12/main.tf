@@ -48,6 +48,39 @@ resource "aws_security_group" "strapi_sg" {
   }
 }
 
+
+resource "aws_security_group" "strapi_sg" {
+  name        = "strapi-sg-sk2"
+  description = "Allow HTTP"
+  vpc_id = data.aws_vpc.default.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+
+  ingress {
+    from_port   = 1337
+    to_port     = 1337
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "strapi-sg-sk"
+  }
+}
+
 resource "aws_ecs_cluster" "strapi_cluster" {
   name = "strapi-cluster-sk"
 }
