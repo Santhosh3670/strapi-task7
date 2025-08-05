@@ -2,7 +2,7 @@ name: Task 11 - Blue/Green ECS Deployment with Terraform
 
 on:
   push:
-    branches: [ main ]
+    branches: [ santhosh ]
 
 env:
   AWS_REGION: us-east-2
