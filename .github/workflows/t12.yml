@@ -78,5 +78,5 @@ jobs:
             --deployment-group-name $DEPLOYMENT_GROUP \
             --s3-location bucket=$S3_BUCKET,bundleType=YAML,key=appspec.yaml \
             --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
-            --deployment-style deploymentType=BLUE_GREEN,deploymentOption=WITH_TRAFFIC_CONTROL
+            
 
