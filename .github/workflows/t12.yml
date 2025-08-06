@@ -46,15 +46,33 @@ jobs:
         run: |
           echo '[{"name":"strapi-container","imageUri":"'"$IMAGE_URI"'"}]' > imagedefinitions.json
 
+       - name: Register new ECS task definition and get ARN
+        id: register-task-def
+        run: |
+          NEW_TASK_DEF=$(aws ecs register-task-definition \
+            --family strapi-task-def-sk \
+            --execution-role-arn arn:aws:iam::607700977843:role/ecs-task-execution-role \
+            --network-mode awsvpc \
+            --container-definitions "[{\"name\":\"strapi-container\",\"image\":\"${IMAGE_URI}\",\"portMappings\":[{\"containerPort\":1337,\"protocol\":\"tcp\"}],\"essential\":true}]" \
+            --requires-compatibilities FARGATE \
+            --cpu "256" \
+            --memory "512" \
+            --task-role-arn arn:aws:iam::607700977843:role/ecs-task-execution-role \
+            --region $AWS_REGION \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+          echo "TASK_DEF_ARN=$NEW_TASK_DEF" >> $GITHUB_ENV
+
+
       - name: Create appspec.yaml
         run: |
-          cat <<EOF > appspec.yaml
+          cat > appspec.yaml <<EOF
           version: 0.0
           Resources:
             - TargetService:
                 Type: AWS::ECS::Service
                 Properties:
-                  TaskDefinition: ""
+                  TaskDefinition: "${TASK_DEF_ARN}"
                   LoadBalancerInfo:
                     ContainerName: "strapi-container"
                     ContainerPort: 1337
