@@ -58,6 +58,7 @@ jobs:
                   LoadBalancerInfo:
                     ContainerName: "strapi-container"
                     ContainerPort: 1337
+                  PlatformVersion: "LATEST"
           EOF
 
       - name: Zip deployment files
