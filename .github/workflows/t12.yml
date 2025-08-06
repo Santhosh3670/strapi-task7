@@ -83,7 +83,6 @@ jobs:
             --deployment-group-name strapi-deployment-group-sk \
             --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
             --s3-location bucket=sandy-starpi,key=revisions/strapi-deployment-${{ github.sha }}.zip,bundleType=zip \
-            --auto-rollback-configuration enabled=true,events=DEPLOYMENT_FAILURE \
             --region us-east-2
            
 
