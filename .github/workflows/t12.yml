@@ -74,9 +74,12 @@ jobs:
       - name: Trigger CodeDeploy deployment
         run: |
           aws deploy create-deployment \
-            --application-name $CODEDEPLOY_APP \
-            --deployment-group-name $DEPLOYMENT_GROUP \
-            --s3-location bucket=$S3_BUCKET,bundleType=YAML,key=appspec.yaml \
+            --application-name strapi-codedeploy-app-sk \
+            --deployment-group-name strapi-deployment-group-sk \
             --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
-            
+            --s3-location bucket=sandy-starpi,key=revisions/strapi-deployment-${{ github.sha }}.zip,bundleType=zip \
+            --file-exists-behavior OVERWRITE \
+            --auto-rollback-configuration enabled=true,events=DEPLOYMENT_FAILURE \
+            --region us-east-2
+           
 
