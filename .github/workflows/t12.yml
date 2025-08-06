@@ -60,10 +60,15 @@ jobs:
                     ContainerPort: 1337
           EOF
 
-      - name: Upload deployment files to S3
+      - name: Zip deployment files
         run: |
-          aws s3 cp appspec.yaml s3://$S3_BUCKET/appspec.yaml
-          aws s3 cp imagedefinitions.json s3://$S3_BUCKET/imagedefinitions.json
+          mkdir -p bundle
+          cp appspec.yaml imagedefinitions.json bundle/
+          cd bundle && zip ../strapi-deployment-${{ github.sha }}.zip * && cd ..
+
+      - name: Upload zip to S3
+        run: |
+          aws s3 cp strapi-deployment-${{ github.sha }}.zip s3://$S3_BUCKET/revisions/strapi-deployment-${{ github.sha }}.zip
 
       - name: Upgrade AWS CLI to v2
         run: |
@@ -78,7 +83,6 @@ jobs:
             --deployment-group-name strapi-deployment-group-sk \
             --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
             --s3-location bucket=sandy-starpi,key=revisions/strapi-deployment-${{ github.sha }}.zip,bundleType=zip \
-            --file-exists-behavior OVERWRITE \
             --auto-rollback-configuration enabled=true,events=DEPLOYMENT_FAILURE \
             --region us-east-2
            
