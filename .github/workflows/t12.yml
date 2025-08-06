@@ -46,7 +46,7 @@ jobs:
         run: |
           echo '[{"name":"strapi-container","imageUri":"'"$IMAGE_URI"'"}]' > imagedefinitions.json
 
-       - name: Register new ECS task definition and get ARN
+      - name: Register new ECS task definition and get ARN
         id: register-task-def
         run: |
           NEW_TASK_DEF=$(aws ecs register-task-definition \
@@ -62,7 +62,6 @@ jobs:
             --query 'taskDefinition.taskDefinitionArn' \
             --output text)
           echo "TASK_DEF_ARN=$NEW_TASK_DEF" >> $GITHUB_ENV
-
 
       - name: Create appspec.yaml
         run: |
