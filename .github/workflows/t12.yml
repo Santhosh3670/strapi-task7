@@ -74,7 +74,7 @@ jobs:
       - name: Trigger CodeDeploy deployment
         run: |
           aws deploy create-deployment \
-            --application-name strapi-codedeploy-app-sk \
+            --application-name strapi-codedeploy-sk \
             --deployment-group-name strapi-deployment-group-sk \
             --deployment-config-name CodeDeployDefault.ECSAllAtOnce \
             --s3-location bucket=sandy-starpi,key=revisions/strapi-deployment-${{ github.sha }}.zip,bundleType=zip \
