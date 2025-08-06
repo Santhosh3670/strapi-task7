@@ -16,7 +16,7 @@ jobs:
       ECS_CLUSTER: strapi-cluster-sk
       ECS_SERVICE: strapi-service-sk
       CODEDEPLOY_APP: strapi-codedeploy-sk
-      DEPLOYMENT_GROUP: strapi-codedeploy-group-sk
+      DEPLOYMENT_GROUP: strapi-deployment-group-sk
       S3_BUCKET: sandy-starpi
 
     steps:
